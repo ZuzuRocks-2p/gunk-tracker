@@ -15,7 +15,9 @@
     --text: #f0f0f0;
     --text-dim: #a0a0a0;
     --gunk: #b84dff;
+    --gunk-bright: #d47aff;
     --clean: #888;
+    --clean-bright: #bbb;
     --danger: #c0392b;
     --ok: #27ae60;
     --warn: #f39c12;
@@ -34,7 +36,7 @@
 
   /* Setup */
   .setup-wrap { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
-  .setup-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; text-align: center; }
+  .setup-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; text-align: center; background: linear-gradient(90deg, var(--gunk), var(--accent-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .setup-sub { color: var(--text-dim); text-align: center; font-size: 14px; }
   .field { width: 100%; display: flex; flex-direction: column; gap: 4px; }
   .field label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -47,16 +49,17 @@
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     border: none; border-radius: 12px; padding: 16px 20px; font-size: 17px; font-weight: 700;
     cursor: pointer; color: #fff; background: var(--accent); min-height: 56px; min-width: 56px;
-    transition: transform .05s, background .15s;
+    transition: transform .08s, background .15s, box-shadow .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary { background: var(--accent); width: 100%; }
-  .btn-primary:hover { background: var(--accent-light); }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-light)); width: 100%; }
+  .btn-primary:hover { background: linear-gradient(135deg, var(--accent-light), var(--accent-glow)); box-shadow: 0 4px 16px rgba(157,92,224,0.25); }
   .btn-secondary { background: #222; border: 2px solid #333; font-size: 15px; padding: 12px 14px; }
-  .btn-secondary:hover { background: #2a2a2a; }
-  .btn-danger { background: var(--danger); }
+  .btn-secondary:hover { background: #2a2a2a; border-color: #444; }
+  .btn-danger { background: linear-gradient(135deg, #a93226, var(--danger)); }
   .btn-warn { background: var(--warn); color: #000; }
-  .btn-ok { background: var(--ok); }
+  .btn-ok { background: linear-gradient(135deg, #1e8449, var(--ok)); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .seed-display { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; color: var(--accent-glow); word-break: break-all; text-align: center; }
 
@@ -64,8 +67,10 @@
   .op-setup-card {
     background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 14px;
     display: flex; flex-direction: column; gap: 10px;
+    transition: border-color .2s, box-shadow .2s;
   }
-  .op-setup-card .op-color { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .op-setup-card:hover { border-color: #3a3a3a; }
+  .op-setup-card .op-color { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px currentColor; }
 
   /* Tabs */
   .tab-bar {
@@ -77,20 +82,22 @@
     flex: 1; min-width: 80px; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 700;
     cursor: pointer; border: none; background: transparent; color: var(--text-dim);
     border-bottom: 3px solid transparent; white-space: nowrap;
-    display: flex; align-items: center; justify-content: center; gap: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all .15s;
   }
   .tab.active { color: var(--text); background: var(--tab-active); border-bottom-color: var(--accent-glow); }
-  .tab .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .tab .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px currentColor; }
 
   /* Header */
   .header {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 12px;
     background: var(--bg-elev); border-bottom: 1px solid #222;
   }
-  .stat { text-align: center; }
+  .stat { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .stat .val { font-size: 20px; font-weight: 800; }
   .stat .lbl { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px; }
-  .stat.gunk .val { color: var(--gunk); }
+  .stat.gunk .val { color: var(--gunk); text-shadow: 0 0 10px rgba(184,77,255,0.3); }
+  .stat-icon { width: 20px; height: 20px; opacity: 0.6; }
 
   /* Main body */
   .main-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
@@ -99,16 +106,42 @@
   .reveal-box {
     background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 16px;
     text-align: center; display: none; flex-direction: column; gap: 10px; align-items: center;
+    animation: revealIn .3s ease-out;
   }
   .reveal-box.active { display: flex; }
   .reveal-title { font-size: 16px; font-weight: 700; }
-  .reveal-card {
-    width: 100%; max-width: 280px; padding: 18px; border-radius: 14px; border: 3px solid;
-    font-size: 20px; font-weight: 800; text-align: center;
+  @keyframes revealIn { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* Card Art */
+  .card-art {
+    width: 100%; max-width: 260px; aspect-ratio: 200 / 280;
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform .2s;
   }
-  .reveal-card.gunk { border-color: var(--gunk); color: var(--gunk); background: rgba(184,77,255,0.08); }
-  .reveal-card.clean { border-color: var(--clean); color: var(--clean); background: rgba(136,136,136,0.08); }
-  .reveal-empty { color: var(--danger); font-weight: 700; }
+  .card-art:hover { transform: translateY(-4px); }
+  .card-art svg { width: 100%; height: 100%; display: block; }
+
+  /* Mini card for hand */
+  .mini-card {
+    width: 42px; height: 58px; border-radius: 6px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+    animation: miniPop .25s ease-out;
+  }
+  @keyframes miniPop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  .mini-card svg { width: 100%; height: 100%; display: block; }
+
+  /* Panel card row */
+  .panel-card-art {
+    width: 100%; max-width: 180px; aspect-ratio: 200 / 280;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .panel-card-art svg { width: 100%; height: 100%; display: block; }
 
   /* Action grid */
   .actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -124,7 +157,9 @@
     background: var(--bg-elev); width: 100%; max-width: 600px; max-height: 92vh;
     border-radius: 20px 20px 0 0; padding: 16px; display: flex; flex-direction: column; gap: 10px;
     border-top: 2px solid var(--accent);
+    animation: slideUp .2s ease-out;
   }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .panel-header { display: flex; align-items: center; justify-content: space-between; }
   .panel-title { font-size: 18px; font-weight: 800; }
   .panel-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
@@ -136,9 +171,11 @@
   .vcard {
     display: flex; align-items: center; gap: 10px; background: var(--bg-card);
     border: 2px solid #2a2a2a; border-radius: 14px; padding: 12px;
+    transition: border-color .15s;
   }
-  .vcard.gunk-card { border-color: rgba(184,77,255,0.5); }
-  .vcard.clean-card { border-color: rgba(136,136,136,0.3); }
+  .vcard:hover { border-color: #3a3a3a; }
+  .vcard.gunk-card { border-color: rgba(184,77,255,0.4); }
+  .vcard.clean-card { border-color: rgba(136,136,136,0.25); }
   .vcard-info { flex: 1; }
   .vcard-type { font-size: 15px; font-weight: 700; }
   .vcard-type.gunk-text { color: var(--gunk); }
@@ -147,7 +184,8 @@
   .vcard-actions .btn { padding: 10px 12px; font-size: 13px; min-height: 44px; }
 
   .reorder { display: flex; gap: 6px; flex-direction: column; }
-  .reorder button { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #333; background: #222; color: var(--text); font-size: 18px; }
+  .reorder button { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #333; background: #222; color: var(--text); font-size: 18px; transition: all .1s; }
+  .reorder button:active { background: #333; transform: scale(0.95); }
   .reorder button:disabled { opacity: 0.3; }
 
   /* Gunk hand */
@@ -155,20 +193,16 @@
     background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 14px;
     display: flex; flex-direction: column; gap: 10px;
   }
-  .gunk-hand-title { font-size: 15px; font-weight: 700; color: var(--gunk); }
-  .gunk-hand-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .gunk-chip {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gunk);
-    color: var(--gunk); font-weight: 800; font-size: 18px; background: rgba(184,77,255,0.08);
-  }
+  .gunk-hand-title { font-size: 15px; font-weight: 700; color: var(--gunk); display: flex; align-items: center; gap: 8px; }
+  .gunk-hand-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 58px; }
   .gunk-hand .btn { font-size: 14px; padding: 12px 14px; }
 
   /* History */
   .history-wrap { flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
   .history-title { font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
   .history { flex: 1; overflow-y: auto; background: var(--bg-elev); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-  .history-entry { font-size: 12px; padding: 8px 10px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--accent-light); }
+  .history-entry { font-size: 12px; padding: 8px 10px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--accent-light); animation: histIn .2s ease-out; }
+  @keyframes histIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
   .history-entry .time { color: var(--text-dim); font-size: 10px; margin-right: 6px; }
   .history-entry .op-tag { font-weight: 700; margin-right: 4px; }
 
@@ -184,10 +218,11 @@
 
   /* Tutor */
   .tutor-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .tutor-item { padding: 12px; border-radius: 12px; border: 2px solid #2a2a2a; background: var(--bg-card); text-align: center; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .tutor-item { padding: 12px; border-radius: 12px; border: 2px solid #2a2a2a; background: var(--bg-card); text-align: center; font-weight: 700; cursor: pointer; font-size: 14px; transition: all .1s; }
   .tutor-item.gunk-text { color: var(--gunk); border-color: rgba(184,77,255,0.4); }
   .tutor-item.clean-text { color: var(--clean); border-color: rgba(136,136,136,0.3); }
   .tutor-item:active { transform: scale(0.97); }
+  .tutor-item:hover { border-color: #444; }
 
   /* Bottom action bar */
   .bottom-bar {
@@ -211,6 +246,7 @@
     .end-wrap { max-width: 700px; margin: 0 auto; }
     .tab-bar { justify-content: center; }
     .tab { min-width: 120px; font-size: 14px; padding: 14px 16px; }
+    .card-art { max-width: 300px; }
   }
   @media (min-width: 1024px) {
     .op-setup-grid { grid-template-columns: repeat(3, 1fr); }
@@ -226,6 +262,11 @@
     <div class="setup-wrap">
       <div class="setup-title">GUNK TRACKER</div>
       <div class="setup-sub">Commander edition. Track Gunk across multiple opponents.</div>
+
+      <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin: 8px 0;">
+        <div id="setup-preview-gunk" style="width:100px;"></div>
+        <div id="setup-preview-clean" style="width:100px;"></div>
+      </div>
 
       <div class="field">
         <label for="op-count">Number of Opponents</label>
@@ -247,32 +288,60 @@
   <div id="main-screen" class="screen">
     <div class="tab-bar" id="tab-bar"></div>
     <div class="header">
-      <div class="stat"><div id="s-lib" class="val">0</div><div class="lbl">Library</div></div>
-      <div class="stat gunk"><div id="s-gunk-lib" class="val">0</div><div class="lbl">Gunk in Lib</div></div>
-      <div class="stat gunk"><div id="s-gunk-hand" class="val">0</div><div class="lbl">Gunk Hand</div></div>
-      <div class="stat"><div id="s-gunk-gy" class="val">0</div><div class="lbl">Gunk GY</div></div>
+      <div class="stat">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h5"/></svg>
+        <div id="s-lib" class="val">0</div>
+        <div class="lbl">Library</div>
+      </div>
+      <div class="stat gunk">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gunk)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div id="s-gunk-lib" class="val">0</div>
+        <div class="lbl">Gunk in Lib</div>
+      </div>
+      <div class="stat gunk">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gunk)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div id="s-gunk-hand" class="val">0</div>
+        <div class="lbl">Gunk Hand</div>
+      </div>
+      <div class="stat">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <div id="s-gunk-gy" class="val">0</div>
+        <div class="lbl">Gunk GY</div>
+      </div>
     </div>
 
     <div class="main-body">
       <div id="reveal-box" class="reveal-box">
         <div id="reveal-title" class="reveal-title"></div>
-        <div id="reveal-card" class="reveal-card"></div>
+        <div id="reveal-card"></div>
         <div id="reveal-actions" class="flex-row"></div>
       </div>
 
       <div class="actions">
-        <button id="btn-draw" class="btn btn-primary">DRAW</button>
+        <button id="btn-draw" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          DRAW
+        </button>
         <button id="btn-surveil" class="btn btn-secondary">SURVEIL X</button>
         <button id="btn-scry" class="btn btn-secondary">SCRY X</button>
         <button id="btn-mill" class="btn btn-secondary">MILL X</button>
-        <button id="btn-shuffle" class="btn btn-secondary">SHUFFLE LIB</button>
+        <button id="btn-shuffle" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+          SHUFFLE
+        </button>
         <button id="btn-tutor" class="btn btn-secondary">TUTOR</button>
-        <button id="btn-add-gunk" class="btn btn-secondary">ADD GUNK</button>
+        <button id="btn-add-gunk" class="btn btn-secondary" style="border-color:rgba(184,77,255,0.3);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gunk)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          ADD GUNK
+        </button>
         <button id="btn-op-end" class="btn btn-danger">OPP OUT</button>
       </div>
 
       <div class="gunk-hand">
-        <div class="gunk-hand-title" id="gunk-hand-title">Gunk in Hand</div>
+        <div class="gunk-hand-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span id="gunk-hand-title">Gunk in Hand</span>
+        </div>
         <div class="gunk-hand-row" id="gunk-chips"></div>
         <div class="flex-row">
           <button id="btn-cycle" class="btn btn-secondary flex-1">Cycle Gunk for {4}</button>
@@ -314,7 +383,8 @@
       <div id="panel-body" class="panel-body"></div>
       <div id="panel-footer" class="panel-footer"></div>
     </div>
-  
+  </div>
+
   <!-- CUSTOM PROMPT MODAL -->
   <div id="prompt-overlay" class="panel-overlay">
     <div class="panel" style="max-height:40vh; border-top-color:var(--gunk);">
@@ -341,7 +411,67 @@
 (function() {
   'use strict';
 
-  // ---------- PRNG ----------
+  // ========== SVG CARD GENERATORS ==========
+  function gunkCardSVG(w, h, showText) {
+    w = w || 200; h = h || 280;
+    var text = showText !== false ? '<text x="'+(w/2)+'" y="'+(h/2+6)+'" text-anchor="middle" fill="#b84dff" font-size="'+(w*0.14)+'" font-weight="900" filter="url(#glow'+(w)+')" style="letter-spacing:2px;">GUNK</text>' : '';
+    return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs>' +
+        '<linearGradient id="ggrad'+w+'" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#1a0529"/>' +
+          '<stop offset="40%" stop-color="#2d0a4a"/>' +
+          '<stop offset="100%" stop-color="#0d0218"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="slime'+w+'" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="#d47aff" stop-opacity="0.7"/>' +
+          '<stop offset="100%" stop-color="#b84dff" stop-opacity="0.2"/>' +
+        '</linearGradient>' +
+        '<filter id="glow'+w+'"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+        '<filter id="slimeGlow'+w+'"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+      '</defs>' +
+      '<rect x="2" y="2" width="'+(w-4)+'" height="'+(h-4)+'" rx="'+(w*0.06)+'" fill="url(#ggrad'+w+')" stroke="#b84dff" stroke-width="2.5"/>' +
+      '<path d="M'+(w*0.08)+',2 Q'+(w*0.12)+','+(h*0.12)+' '+(w*0.18)+',2 Q'+(w*0.24)+','+(h*0.18)+' '+(w*0.30)+',2" fill="none" stroke="#d47aff" stroke-width="2" opacity="0.5" filter="url(#slimeGlow'+w+')"/>' +
+      '<path d="M'+(w*0.55)+',2 Q'+(w*0.62)+','+(h*0.15)+' '+(w*0.70)+',2 Q'+(w*0.78)+','+(h*0.20)+' '+(w*0.85)+',2" fill="none" stroke="#d47aff" stroke-width="2" opacity="0.4" filter="url(#slimeGlow'+w+')"/>' +
+      '<ellipse cx="'+(w*0.75)+'" cy="'+(h*0.72)+'" rx="'+(w*0.12)+'" ry="'+(h*0.08)+'" fill="#b84dff" opacity="0.15"/>' +
+      '<ellipse cx="'+(w*0.25)+'" cy="'+(h*0.82)+'" rx="'+(w*0.08)+'" ry="'+(h*0.06)+'" fill="#d47aff" opacity="0.12"/>' +
+      '<circle cx="'+(w*0.20)+'" cy="'+(h*0.30)+'" r="'+(w*0.03)+'" fill="#d47aff" opacity="0.3"/>' +
+      '<circle cx="'+(w*0.80)+'" cy="'+(h*0.25)+'" r="'+(w*0.04)+'" fill="#b84dff" opacity="0.25"/>' +
+      '<circle cx="'+(w*0.50)+'" cy="'+(h*0.15)+'" r="'+(w*0.025)+'" fill="#d47aff" opacity="0.35"/>' +
+      text +
+    '</svg>';
+  }
+
+  function cleanCardSVG(w, h, showText) {
+    w = w || 200; h = h || 280;
+    var text = showText !== false ? '<text x="'+(w/2)+'" y="'+(h/2+6)+'" text-anchor="middle" fill="#888" font-size="'+(w*0.12)+'" font-weight="700" style="letter-spacing:1px;">CLEAN</text>' : '';
+    return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs>' +
+        '<linearGradient id="cgrad'+w+'" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#2a2a2a"/>' +
+          '<stop offset="100%" stop-color="#151515"/>' +
+        '</linearGradient>' +
+        '<pattern id="cpat'+w+'" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">' +
+          '<circle cx="10" cy="10" r="1" fill="#333" opacity="0.3"/>' +
+        '</pattern>' +
+      '</defs>' +
+      '<rect x="2" y="2" width="'+(w-4)+'" height="'+(h-4)+'" rx="'+(w*0.06)+'" fill="url(#cgrad'+w+')" stroke="#555" stroke-width="2"/>' +
+      '<rect x="6" y="6" width="'+(w-12)+'" height="'+(h-12)+'" rx="'+(w*0.04)+'" fill="url(#cpat'+w+')"/>' +
+      '<line x1="'+(w*0.15)+'" y1="'+(h*0.12)+'" x2="'+(w*0.85)+'" y2="'+(h*0.12)+'" stroke="#444" stroke-width="1" opacity="0.5"/>' +
+      '<line x1="'+(w*0.15)+'" y1="'+(h*0.88)+'" x2="'+(w*0.85)+'" y2="'+(h*0.88)+'" stroke="#444" stroke-width="1" opacity="0.5"/>' +
+      text +
+    '</svg>';
+  }
+
+  function cardArtHTML(type, size) {
+    size = size || 'large';
+    var w = size === 'large' ? 260 : (size === 'panel' ? 180 : 42);
+    var h = size === 'large' ? 364 : (size === 'panel' ? 252 : 58);
+    var cls = size === 'large' ? 'card-art' : (size === 'panel' ? 'panel-card-art' : 'mini-card');
+    var svg = type === 'gunk' ? gunkCardSVG(w, h) : cleanCardSVG(w, h);
+    return '<div class="'+cls+'">' + svg + '</div>';
+  }
+
+  // ========== PRNG ==========
   function mulberry32(a) {
     return function() {
       a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -359,7 +489,7 @@
   var OPP_COLORS = ['var(--op1)','var(--op2)','var(--op3)'];
   var OPP_NAMES = ['Opponent 1','Opponent 2','Opponent 3'];
 
-  // ---------- State ----------
+  // ========== State ==========
   var opponents = [];
   var activeOp = 0;
   var panelMode = '';
@@ -401,13 +531,13 @@
   }
   function countGunk(arr){ return arr.filter(function(c){ return c.type==='gunk'; }).length; }
 
-  // ---------- DOM ----------
+  // ========== DOM ==========
   function $(id){ return document.getElementById(id); }
   function showScreen(name) {
     ['setup-screen','main-screen','end-screen'].forEach(function(id){ $(id).classList.toggle('active', id === name+'-screen'); });
   }
 
-  // ---------- Setup UI ----------
+  // ========== Setup UI ==========
   function renderOpSetup() {
     var count = parseInt($('op-count').value, 10) || 2;
     var box = $('op-setup-list');
@@ -427,6 +557,10 @@
       box.appendChild(card);
     }
   }
+
+  // Show card previews on setup
+  $('setup-preview-gunk').innerHTML = cardArtHTML('gunk', 'panel');
+  $('setup-preview-clean').innerHTML = cardArtHTML('clean', 'panel');
 
   $('op-count').addEventListener('change', renderOpSetup);
   renderOpSetup();
@@ -463,7 +597,7 @@
     showScreen('main');
   });
 
-  // ---------- Tabs ----------
+  // ========== Tabs ==========
   function buildTabs() {
     var bar = $('tab-bar');
     bar.innerHTML = '';
@@ -489,7 +623,7 @@
     $('gunk-hand-title').textContent = opponents[idx].name + ' — Gunk in Hand';
   }
 
-  // ---------- Rendering ----------
+  // ========== Rendering ==========
   function op() { return opponents[activeOp]; }
 
   function updateHeader() {
@@ -532,9 +666,9 @@
     box.innerHTML = '';
     var o = op();
     for (var i=0;i<o.handGunk;i++) {
-      var s = document.createElement('span');
-      s.className = 'gunk-chip'; s.textContent = 'G';
-      box.appendChild(s);
+      var wrap = document.createElement('div');
+      wrap.innerHTML = cardArtHTML('gunk', 'mini');
+      box.appendChild(wrap.firstElementChild);
     }
     if (o.handGunk === 0) {
       var e = document.createElement('span');
@@ -543,9 +677,9 @@
     }
   }
 
-  function showReveal(title, html, actionsHtml) {
+  function showReveal(title, cardHTML, actionsHtml) {
     $('reveal-title').textContent = title || '';
-    $('reveal-card').innerHTML = html || '';
+    $('reveal-card').innerHTML = cardHTML || '';
     $('reveal-actions').innerHTML = actionsHtml || '';
     $('reveal-box').classList.add('active');
   }
@@ -559,20 +693,20 @@
     renderHistory();
   }
 
-  // ---------- Draw ----------
+  // ========== Draw ==========
   $('btn-draw').addEventListener('click', function() {
     hideReveal();
     var o = op();
-    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     if (o.library.length === 0) {
-      showReveal('Draw', '<div class="reveal-empty">Library empty!</div>', '');
+      showReveal('Draw', '<div style="color:var(--danger); font-weight:700;">Library empty!</div>', '');
       logOp('Draw: Library empty');
       return;
     }
     o.drawCount++;
     var card = o.library.shift();
     var isGunk = card.type === 'gunk';
-    var html = '<div class="reveal-card ' + (isGunk?'gunk':'clean') + '">' + (isGunk?'GUNK':'Clean') + '</div>';
+    var html = cardArtHTML(card.type, 'large');
     var actions = '';
     if (isGunk) {
       actions = '<button id="add-hand" class="btn btn-primary">Add to Hand</button>';
@@ -593,7 +727,7 @@
     }
   });
 
-  // ---------- Panel helpers ----------
+  // ========== Panel helpers ==========
   function openPanel(title, mode) {
     panelMode = mode;
     $('panel-title').textContent = title;
@@ -611,6 +745,11 @@
     opts = opts || {};
     var div = document.createElement('div');
     div.className = 'vcard ' + (card.type==='gunk'?'gunk-card':'clean-card');
+
+    var artWrap = document.createElement('div');
+    artWrap.innerHTML = cardArtHTML(card.type, 'panel');
+    div.appendChild(artWrap.firstElementChild);
+
     var info = document.createElement('div');
     info.className = 'vcard-info';
     var type = document.createElement('div');
@@ -655,12 +794,12 @@
     return div;
   }
 
-  // ---------- Surveil ----------
+  // ========== Surveil ==========
   $('btn-surveil').addEventListener('click', function() { openPanel('Surveil', 'surveil'); });
 
   function doSurveilLook() {
     var o = op();
-    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
     panelCards = o.library.slice(0, n);
     panelResult = panelCards.map(function(c,i){ return { card: c, toGraveyard: false, index: i }; });
@@ -722,12 +861,12 @@
     closePanel();
   }
 
-  // ---------- Scry ----------
+  // ========== Scry ==========
   $('btn-scry').addEventListener('click', function() { openPanel('Scry', 'scry'); });
 
   function doScryLook() {
     var o = op();
-    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
     panelResult = o.library.slice(0, n);
     renderScry();
@@ -763,12 +902,12 @@
     closePanel();
   }
 
-  // ---------- Mill ----------
+  // ========== Mill ==========
   $('btn-mill').addEventListener('click', function() { openPanel('Mill', 'mill'); });
 
   function doMillLook() {
     var o = op();
-    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
     panelResult = o.library.slice(0, n);
     renderMill();
@@ -803,10 +942,10 @@
     closePanel();
   }
 
-  // ---------- Tutor ----------
+  // ========== Tutor ==========
   $('btn-tutor').addEventListener('click', function() {
     var o = op();
-    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     openPanel('Tutor — Choose a card to fetch', 'tutor');
     $('panel-body').innerHTML = '';
     if (o.library.length === 0) { $('panel-body').textContent = 'Library is empty.'; return; }
@@ -827,10 +966,10 @@
     $('panel-body').appendChild(list);
   });
 
-  // ---------- Shuffle Library ----------
+  // ========== Shuffle Library ==========
   $('btn-shuffle').addEventListener('click', function() {
     var o = op();
-    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     if (o.library.length === 0) { logOp('Shuffle: Library empty'); return; }
     var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
     var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
@@ -838,15 +977,15 @@
     var rng = mulberry32(seedNum);
     shuffleInPlace(o.library, rng);
     logOp('Shuffled library (Seed: ' + seedHex + ')');
-    showReveal('Shuffled', '<div class="reveal-card clean">Library Shuffled</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
+    showReveal('Shuffled', cardArtHTML('clean', 'large') + '<div class="seed-display" style="margin-top:8px;">Seed: ' + seedHex + '</div>', '');
     setTimeout(hideReveal, 2000);
     updateHeader();
   });
 
-  // ---------- Cycle Gunk ----------
+  // ========== Cycle Gunk ==========
   $('btn-cycle').addEventListener('click', function() {
     var o = op();
-    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     if (o.handGunk <= 0) return;
     o.handGunk--;
     o.gunkCycledTotal++;
@@ -856,7 +995,7 @@
 
     if (o.library.length === 0) {
       logOp('Cycle: Library empty, no replacement');
-      showReveal('Cycle', '<div class="reveal-empty">Library empty — no replacement draw</div>', '');
+      showReveal('Cycle', '<div style="color:var(--danger); font-weight:700;">Library empty — no replacement draw</div>', '');
       return;
     }
     var card = o.library.shift();
@@ -865,27 +1004,27 @@
       o.gunkDrawnTotal++;
       renderGunkHand();
       updateHeader();
-      showReveal('Cycle Replacement', '<div class="reveal-card gunk">GUNK!</div><div style="color:var(--gunk); font-weight:700;">Cycled into another GUNK!</div>', '');
+      showReveal('Cycle Replacement', cardArtHTML('gunk', 'large') + '<div style="color:var(--gunk); font-weight:700; margin-top:8px;">Cycled into another GUNK!</div>', '');
       logOp('Cycle replacement: GUNK');
     } else {
-      showReveal('Cycle Replacement', '<div class="reveal-card clean">Clean</div>', '');
+      showReveal('Cycle Replacement', cardArtHTML('clean', 'large'), '');
       logOp('Cycle replacement: Clean');
     }
   });
 
-  // ---------- Opponent Eliminated ----------
+  // ========== Opponent Eliminated ==========
   $('btn-op-end').addEventListener('click', function() {
     var o = op();
     if (confirm('Eliminate ' + o.name + '?')) {
       o.eliminated = true;
       buildTabs();
-      showReveal('Eliminated', '<div class="reveal-card clean">' + o.name + ' eliminated</div>', '');
+      showReveal('Eliminated', '<div style="font-size:18px; font-weight:800;">' + o.name + ' eliminated</div>', '');
       globalHistory(o.name + ' eliminated');
       setTimeout(hideReveal, 1500);
     }
   });
 
-  // ---------- End Game ----------
+  // ========== End Game ==========
   $('btn-global-end').addEventListener('click', function() {
     var list = $('end-op-list');
     list.innerHTML = '';
@@ -914,7 +1053,7 @@
     showScreen('setup');
   });
 
-  // ---------- Add Gunk ----------
+  // ========== Add Gunk ==========
   function openPrompt(title, label, defaultVal, onConfirm) {
     $('prompt-title').textContent = title;
     $('prompt-label').textContent = label;
@@ -935,7 +1074,7 @@
   $('btn-add-gunk').addEventListener('click', function() {
     hideReveal();
     var o = op();
-    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.eliminated) { showReveal('Eliminated', '<div style="color:var(--danger); font-weight:700;">' + o.name + ' is out</div>', ''); return; }
     openPrompt('Add Gunk', 'How many Gunk cards to add to ' + o.name + '?', '3', function(count) {
       for (var i=0;i<count;i++) o.library.push({ id: Date.now()+i, type: 'gunk' });
       var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
@@ -944,13 +1083,13 @@
       var rng = mulberry32(seedNum);
       shuffleInPlace(o.library, rng);
       logOp('Added ' + count + ' Gunk and reshuffled (Seed: ' + seedHex + ')');
-      showReveal('Gunk Added', '<div class="reveal-card gunk">+' + count + ' GUNK</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
+      showReveal('Gunk Added', cardArtHTML('gunk', 'large') + '<div class="seed-display" style="margin-top:8px;">+' + count + ' GUNK &middot; Seed: ' + seedHex + '</div>', '');
       setTimeout(hideReveal, 2000);
       updateHeader();
     });
   });
 
-  // ---------- Panel look button ----------
+  // ========== Panel look button ==========
   $('panel-look').addEventListener('click', function() {
     if (panelMode === 'surveil') doSurveilLook();
     else if (panelMode === 'scry') doScryLook();
