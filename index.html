@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Gunk Tracker</title>
+<title>Gunk Tracker — Commander</title>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -19,6 +19,10 @@
     --danger: #c0392b;
     --ok: #27ae60;
     --warn: #f39c12;
+    --op1: #e74c3c;
+    --op2: #3498db;
+    --op3: #2ecc71;
+    --tab-active: #222;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 16px; height: 100%; overflow: hidden; }
@@ -29,56 +33,77 @@
   .screen.active { display: flex; }
 
   /* Setup */
-  .setup-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; gap: 16px; }
-  .setup-title { font-size: 28px; font-weight: 800; letter-spacing: 1px; text-align: center; }
-  .setup-sub { color: var(--text-dim); text-align: center; font-size: 14px; max-width: 320px; }
-  .field { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 14px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-  .field input {
-    width: 100%; padding: 14px 16px; font-size: 18px; background: var(--bg-card); color: var(--text);
+  .setup-wrap { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
+  .setup-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; text-align: center; }
+  .setup-sub { color: var(--text-dim); text-align: center; font-size: 14px; }
+  .field { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .field input, .field select {
+    width: 100%; padding: 14px 16px; font-size: 17px; background: var(--bg-card); color: var(--text);
     border: 2px solid #2a2a2a; border-radius: 12px; outline: none;
   }
-  .field input:focus { border-color: var(--accent-light); }
+  .field input:focus, .field select:focus { border-color: var(--accent-light); }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    border: none; border-radius: 12px; padding: 16px 20px; font-size: 18px; font-weight: 700;
+    border: none; border-radius: 12px; padding: 16px 20px; font-size: 17px; font-weight: 700;
     cursor: pointer; color: #fff; background: var(--accent); min-height: 56px; min-width: 56px;
     transition: transform .05s, background .15s;
   }
   .btn:active { transform: scale(0.97); }
-  .btn-primary { background: var(--accent); width: 100%; max-width: 360px; }
+  .btn-primary { background: var(--accent); width: 100%; }
   .btn-primary:hover { background: var(--accent-light); }
-  .btn-secondary { background: #222; border: 2px solid #333; font-size: 16px; padding: 12px 14px; }
+  .btn-secondary { background: #222; border: 2px solid #333; font-size: 15px; padding: 12px 14px; }
   .btn-secondary:hover { background: #2a2a2a; }
   .btn-danger { background: var(--danger); }
   .btn-warn { background: var(--warn); color: #000; }
   .btn-ok { background: var(--ok); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .seed-display { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; color: var(--accent-glow); word-break: break-all; text-align: center; max-width: 360px; }
+  .seed-display { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; color: var(--accent-glow); word-break: break-all; text-align: center; }
+
+  /* Opponent setup cards */
+  .op-setup-card {
+    background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .op-setup-card .op-color { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex; background: var(--bg-elev); border-bottom: 1px solid #222;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1; min-width: 80px; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 700;
+    cursor: pointer; border: none; background: transparent; color: var(--text-dim);
+    border-bottom: 3px solid transparent; white-space: nowrap;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .tab.active { color: var(--text); background: var(--tab-active); border-bottom-color: var(--accent-glow); }
+  .tab .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
   /* Header */
   .header {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px 12px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 12px;
     background: var(--bg-elev); border-bottom: 1px solid #222;
   }
   .stat { text-align: center; }
-  .stat .val { font-size: 22px; font-weight: 800; }
+  .stat .val { font-size: 20px; font-weight: 800; }
   .stat .lbl { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px; }
   .stat.gunk .val { color: var(--gunk); }
-  .stat.clean .val { color: var(--clean); }
 
   /* Main body */
   .main-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 
   /* Card reveal */
   .reveal-box {
-    background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 18px;
+    background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 16px;
     text-align: center; display: none; flex-direction: column; gap: 10px; align-items: center;
   }
   .reveal-box.active { display: flex; }
-  .reveal-title { font-size: 18px; font-weight: 700; }
+  .reveal-title { font-size: 16px; font-weight: 700; }
   .reveal-card {
-    width: 100%; max-width: 280px; padding: 20px; border-radius: 14px; border: 3px solid;
+    width: 100%; max-width: 280px; padding: 18px; border-radius: 14px; border: 3px solid;
     font-size: 20px; font-weight: 800; text-align: center;
   }
   .reveal-card.gunk { border-color: var(--gunk); color: var(--gunk); background: rgba(184,77,255,0.08); }
@@ -86,10 +111,10 @@
   .reveal-empty { color: var(--danger); font-weight: 700; }
 
   /* Action grid */
-  .actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .actions .btn { width: 100%; font-size: 16px; padding: 16px 10px; }
+  .actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .actions .btn { width: 100%; font-size: 15px; padding: 14px 8px; }
 
-  /* Panel (Surveil/Scry/etc) */
+  /* Panel */
   .panel-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50;
     display: none; align-items: flex-end; justify-content: center;
@@ -101,12 +126,12 @@
     border-top: 2px solid var(--accent);
   }
   .panel-header { display: flex; align-items: center; justify-content: space-between; }
-  .panel-title { font-size: 20px; font-weight: 800; }
+  .panel-title { font-size: 18px; font-weight: 800; }
   .panel-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
   .panel-footer { display: flex; gap: 10px; }
   .panel-footer .btn { flex: 1; }
 
-  /* Virtual cards in panels */
+  /* Virtual cards */
   .vstack { display: flex; flex-direction: column; gap: 10px; }
   .vcard {
     display: flex; align-items: center; gap: 10px; background: var(--bg-card);
@@ -115,13 +140,12 @@
   .vcard.gunk-card { border-color: rgba(184,77,255,0.5); }
   .vcard.clean-card { border-color: rgba(136,136,136,0.3); }
   .vcard-info { flex: 1; }
-  .vcard-type { font-size: 16px; font-weight: 700; }
+  .vcard-type { font-size: 15px; font-weight: 700; }
   .vcard-type.gunk-text { color: var(--gunk); }
   .vcard-type.clean-text { color: var(--clean); }
   .vcard-actions { display: flex; gap: 8px; }
-  .vcard-actions .btn { padding: 10px 12px; font-size: 14px; min-height: 44px; }
+  .vcard-actions .btn { padding: 10px 12px; font-size: 13px; min-height: 44px; }
 
-  /* Reorder controls */
   .reorder { display: flex; gap: 6px; flex-direction: column; }
   .reorder button { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #333; background: #222; color: var(--text); font-size: 18px; }
   .reorder button:disabled { opacity: 0.3; }
@@ -131,43 +155,67 @@
     background: var(--bg-card); border: 2px solid #2a2a2a; border-radius: 16px; padding: 14px;
     display: flex; flex-direction: column; gap: 10px;
   }
-  .gunk-hand-title { font-size: 16px; font-weight: 700; color: var(--gunk); }
+  .gunk-hand-title { font-size: 15px; font-weight: 700; color: var(--gunk); }
   .gunk-hand-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .gunk-chip {
     display: inline-flex; align-items: center; justify-content: center;
     width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--gunk);
     color: var(--gunk); font-weight: 800; font-size: 18px; background: rgba(184,77,255,0.08);
   }
-  .gunk-hand .btn { font-size: 15px; padding: 12px 14px; }
+  .gunk-hand .btn { font-size: 14px; padding: 12px 14px; }
 
   /* History */
   .history-wrap { flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
-  .history-title { font-size: 14px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+  .history-title { font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
   .history { flex: 1; overflow-y: auto; background: var(--bg-elev); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-  .history-entry { font-size: 13px; padding: 8px 10px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--accent-light); }
-  .history-entry .time { color: var(--text-dim); font-size: 11px; margin-right: 6px; }
+  .history-entry { font-size: 12px; padding: 8px 10px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--accent-light); }
+  .history-entry .time { color: var(--text-dim); font-size: 10px; margin-right: 6px; }
+  .history-entry .op-tag { font-weight: 700; margin-right: 4px; }
 
   /* End screen */
-  .end-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; gap: 16px; }
-  .end-title { font-size: 26px; font-weight: 800; }
-  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 400px; }
-  .stat-card { background: var(--bg-card); border-radius: 14px; padding: 16px; text-align: center; border: 2px solid #2a2a2a; }
-  .stat-card .num { font-size: 28px; font-weight: 800; color: var(--accent-glow); }
-  .stat-card .desc { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .end-wrap { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; }
+  .end-title { font-size: 22px; font-weight: 800; text-align: center; }
+  .op-end-card { background: var(--bg-card); border-radius: 14px; padding: 14px; border: 2px solid #2a2a2a; }
+  .op-end-card .op-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { background: var(--bg-elev); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat-card .num { font-size: 22px; font-weight: 800; color: var(--accent-glow); }
+  .stat-card .desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
-  /* Tutor list */
+  /* Tutor */
   .tutor-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .tutor-item { padding: 12px; border-radius: 12px; border: 2px solid #2a2a2a; background: var(--bg-card); text-align: center; font-weight: 700; cursor: pointer; }
+  .tutor-item { padding: 12px; border-radius: 12px; border: 2px solid #2a2a2a; background: var(--bg-card); text-align: center; font-weight: 700; cursor: pointer; font-size: 14px; }
   .tutor-item.gunk-text { color: var(--gunk); border-color: rgba(184,77,255,0.4); }
   .tutor-item.clean-text { color: var(--clean); border-color: rgba(136,136,136,0.3); }
   .tutor-item:active { transform: scale(0.97); }
 
-  /* Small helpers */
+  /* Bottom action bar */
+  .bottom-bar {
+    display: flex; gap: 8px; padding: 10px 12px; background: var(--bg-elev);
+    border-top: 1px solid #222;
+  }
+  .bottom-bar .btn { flex: 1; font-size: 14px; padding: 12px 8px; min-height: 48px; }
+
+  /* Helpers */
   .flex-row { display: flex; gap: 10px; align-items: center; }
   .flex-1 { flex: 1; }
   .text-dim { color: var(--text-dim); }
   .mt-4 { margin-top: 4px; }
   .mb-4 { margin-bottom: 4px; }
+
+  /* Tablet layout: 2-column when wide enough */
+  @media (min-width: 768px) {
+    .setup-wrap { max-width: 700px; margin: 0 auto; }
+    .op-setup-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .actions { grid-template-columns: repeat(4, 1fr); }
+    .end-wrap { max-width: 700px; margin: 0 auto; }
+    .tab-bar { justify-content: center; }
+    .tab { min-width: 120px; font-size: 14px; padding: 14px 16px; }
+  }
+  @media (min-width: 1024px) {
+    .op-setup-grid { grid-template-columns: repeat(3, 1fr); }
+    .actions { grid-template-columns: repeat(4, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -177,28 +225,27 @@
   <div id="setup-screen" class="screen active">
     <div class="setup-wrap">
       <div class="setup-title">GUNK TRACKER</div>
-      <div class="setup-sub">Virtual tracking for Fludge, Bringer of Gunk. Place this device between both players.</div>
+      <div class="setup-sub">Commander edition. Track Gunk across multiple opponents.</div>
 
       <div class="field">
-        <label for="lib-size">Opponent's Library Size</label>
-        <input id="lib-size" type="number" inputmode="numeric" value="40" min="0" max="999">
-      </div>
-      <div class="field">
-        <label for="gunk-count">Gunk Cards to Shuffle In</label>
-        <input id="gunk-count" type="number" inputmode="numeric" value="3" min="0" max="999">
-      </div>
-      <div class="field">
-        <label for="custom-seed">Custom Seed (optional)</label>
-        <input id="custom-seed" type="text" placeholder="Leave blank for random seed" autocomplete="off">
+        <label for="op-count">Number of Opponents</label>
+        <select id="op-count">
+          <option value="1">1 Opponent</option>
+          <option value="2" selected>2 Opponents</option>
+          <option value="3">3 Opponents</option>
+        </select>
       </div>
 
-      <button id="btn-setup" class="btn btn-primary">Shuffle Gunk Into Library</button>
+      <div id="op-setup-list" class="op-setup-grid"></div>
+
+      <button id="btn-setup" class="btn btn-primary">Start Game</button>
       <div id="setup-seed" class="seed-display"></div>
     </div>
   </div>
 
   <!-- MAIN -->
   <div id="main-screen" class="screen">
+    <div class="tab-bar" id="tab-bar"></div>
     <div class="header">
       <div class="stat"><div id="s-lib" class="val">0</div><div class="lbl">Library</div></div>
       <div class="stat gunk"><div id="s-gunk-lib" class="val">0</div><div class="lbl">Gunk in Lib</div></div>
@@ -221,14 +268,14 @@
         <button id="btn-shuffle" class="btn btn-secondary">SHUFFLE LIB</button>
         <button id="btn-tutor" class="btn btn-secondary">TUTOR</button>
         <button id="btn-add-gunk" class="btn btn-secondary">ADD GUNK</button>
+        <button id="btn-op-end" class="btn btn-danger">OPP OUT</button>
       </div>
 
       <div class="gunk-hand">
-        <div class="gunk-hand-title">Gunk in Hand</div>
+        <div class="gunk-hand-title" id="gunk-hand-title">Gunk in Hand</div>
         <div class="gunk-hand-row" id="gunk-chips"></div>
         <div class="flex-row">
           <button id="btn-cycle" class="btn btn-secondary flex-1">Cycle Gunk for {4}</button>
-          <button id="btn-end" class="btn btn-danger">End Game</button>
         </div>
       </div>
 
@@ -237,24 +284,23 @@
         <div id="history" class="history"></div>
       </div>
     </div>
+
+    <div class="bottom-bar">
+      <button id="btn-global-end" class="btn btn-danger">End Game</button>
+    </div>
   </div>
 
   <!-- END -->
   <div id="end-screen" class="screen">
     <div class="end-wrap">
       <div class="end-title">Game Over</div>
-      <div class="stats-grid">
-        <div class="stat-card"><div id="e-drawn" class="num">0</div><div class="desc">Gunk Drawn</div></div>
-        <div class="stat-card"><div id="e-cycled" class="num">0</div><div class="desc">Gunk Cycled</div></div>
-        <div class="stat-card"><div id="e-stuck" class="num">0</div><div class="desc">Gunk Stuck in Hand</div></div>
-        <div class="stat-card"><div id="e-removed" class="num">0</div><div class="desc">Cards Removed</div></div>
-      </div>
+      <div id="end-op-list"></div>
       <div id="end-seed" class="seed-display"></div>
       <button id="btn-new" class="btn btn-primary">New Game</button>
     </div>
   </div>
 
-  <!-- PANEL: Surveil / Scry / Mill / Tutor -->
+  <!-- PANEL -->
   <div id="panel-overlay" class="panel-overlay">
     <div class="panel">
       <div class="panel-header">
@@ -285,53 +331,47 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  function makeSeed() {
-    var s = Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
-    return s.toString(16).toUpperCase().padStart(8,'0');
-  }
   function seedFromString(str) {
     var h = 0;
     for (var i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
     return h >>> 0;
   }
 
-  // ---------- State ----------
-  var game = {
-    library: [],
-    handGunk: 0,
-    graveyardGunk: 0,
-    graveyardClean: 0,
-    exiled: [],
-    drawCount: 0,
-    history: [],
-    seed: '',
-    rng: null,
-    totalGunkShuffled: 0,
-    gunkDrawnTotal: 0,
-    gunkCycledTotal: 0,
-    cardsRemovedTotal: 0,
-  };
+  var OPP_COLORS = ['var(--op1)','var(--op2)','var(--op3)'];
+  var OPP_NAMES = ['Opponent 1','Opponent 2','Opponent 3'];
 
+  // ---------- State ----------
+  var opponents = [];
+  var activeOp = 0;
   var panelMode = '';
   var panelCards = [];
   var panelResult = [];
 
-  // ---------- DOM ----------
-  function $(id){ return document.getElementById(id); }
-  function showScreen(name) {
-    ['setup-screen','main-screen','end-screen'].forEach(function(id){ $(id).classList.toggle('active', id === name+'-screen'); });
-  }
-
-  // ---------- Library helpers ----------
-  function countGunk(arr){ return arr.filter(function(c){ return c.type==='gunk'; }).length; }
-  var nextId = (function(){ var n=1; return function(){ return n++; }; })();
-
-  function buildLibrary(libSize, gunkCount, rng) {
+  function newOpponent(idx, name, libSize, gunkCount) {
+    var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
+    var rng = mulberry32(seedNum);
     var lib = [];
-    for (var i=0;i<libSize;i++) lib.push({ id: nextId(), type: 'clean' });
-    for (var i=0;i<gunkCount;i++) lib.push({ id: nextId(), type: 'gunk' });
+    var id = 1;
+    for (var i=0;i<libSize;i++) lib.push({ id: id++, type: 'clean' });
+    for (var i=0;i<gunkCount;i++) lib.push({ id: id++, type: 'gunk' });
     shuffleInPlace(lib, rng);
-    return lib;
+    return {
+      idx: idx,
+      name: name || OPP_NAMES[idx],
+      color: OPP_COLORS[idx % OPP_COLORS.length],
+      library: lib,
+      handGunk: 0,
+      graveyardGunk: 0,
+      graveyardClean: 0,
+      exiled: [],
+      drawCount: 0,
+      eliminated: false,
+      seed: seedNum.toString(16).toUpperCase().padStart(8,'0'),
+      gunkDrawnTotal: 0,
+      gunkCycledTotal: 0,
+      cardsRemovedTotal: 0,
+      history: []
+    };
   }
 
   function shuffleInPlace(arr, rng) {
@@ -340,49 +380,144 @@
       var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
     }
   }
+  function countGunk(arr){ return arr.filter(function(c){ return c.type==='gunk'; }).length; }
 
-  function formatTime() {
-    var d = new Date();
-    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0');
+  // ---------- DOM ----------
+  function $(id){ return document.getElementById(id); }
+  function showScreen(name) {
+    ['setup-screen','main-screen','end-screen'].forEach(function(id){ $(id).classList.toggle('active', id === name+'-screen'); });
   }
 
-  function log(msg) {
-    game.history.unshift({ time: formatTime(), text: msg });
+  // ---------- Setup UI ----------
+  function renderOpSetup() {
+    var count = parseInt($('op-count').value, 10) || 2;
+    var box = $('op-setup-list');
+    box.innerHTML = '';
+    for (var i=0;i<count;i++) {
+      var card = document.createElement('div');
+      card.className = 'op-setup-card';
+      card.innerHTML =
+        '<div style="font-weight:700; font-size:15px; display:flex; align-items:center;">' +
+          '<span class="op-color" style="background:' + OPP_COLORS[i] + ';"></span>' +
+          OPP_NAMES[i] +
+        '</div>' +
+        '<div class="field"><label>Name</label><input type="text" id="op-name-' + i + '" value="' + OPP_NAMES[i] + '" placeholder="Name"></div>' +
+        '<div class="field"><label>Library Size</label><input type="number" id="op-lib-' + i + '" value="40" min="0" max="999"></div>' +
+        '<div class="field"><label>Gunk to Shuffle In</label><input type="number" id="op-gunk-' + i + '" value="3" min="0" max="999"></div>' +
+        '<div class="field"><label>Custom Seed (optional)</label><input type="text" id="op-seed-' + i + '" placeholder="Random" autocomplete="off"></div>';
+      box.appendChild(card);
+    }
+  }
+
+  $('op-count').addEventListener('change', renderOpSetup);
+  renderOpSetup();
+
+  $('btn-setup').addEventListener('click', function() {
+    var count = parseInt($('op-count').value, 10) || 2;
+    opponents = [];
+    for (var i=0;i<count;i++) {
+      var name = $('op-name-'+i).value.trim() || OPP_NAMES[i];
+      var libSize = parseInt($('op-lib-'+i).value, 10) || 0;
+      var gunkCount = parseInt($('op-gunk-'+i).value, 10) || 0;
+      var custom = $('op-seed-'+i).value.trim();
+      var seedNum;
+      if (custom) seedNum = seedFromString(custom);
+      else seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
+      var rng = mulberry32(seedNum);
+      var lib = [];
+      var nid = 1;
+      for (var j=0;j<libSize;j++) lib.push({ id: nid++, type: 'clean' });
+      for (var j=0;j<gunkCount;j++) lib.push({ id: nid++, type: 'gunk' });
+      shuffleInPlace(lib, rng);
+      opponents.push({
+        idx: i, name: name, color: OPP_COLORS[i % OPP_COLORS.length],
+        library: lib, handGunk: 0, graveyardGunk: 0, graveyardClean: 0,
+        exiled: [], drawCount: 0, eliminated: false,
+        seed: seedNum.toString(16).toUpperCase().padStart(8,'0'),
+        gunkDrawnTotal: 0, gunkCycledTotal: 0, cardsRemovedTotal: 0,
+        history: [{ time: formatTime(), text: 'Shuffled ' + gunkCount + ' Gunk into library of ' + libSize + ' (Seed: ' + seedNum.toString(16).toUpperCase().padStart(8,'0') + ')' }]
+      });
+    }
+    activeOp = 0;
+    buildTabs();
+    switchOp(0);
+    showScreen('main');
+  });
+
+  // ---------- Tabs ----------
+  function buildTabs() {
+    var bar = $('tab-bar');
+    bar.innerHTML = '';
+    opponents.forEach(function(op, idx) {
+      var tab = document.createElement('button');
+      tab.className = 'tab' + (idx === activeOp ? ' active' : '');
+      tab.innerHTML = '<span class="dot" style="background:' + op.color + ';"></span>' + escapeHtml(op.name);
+      if (op.eliminated) tab.style.opacity = '0.5';
+      tab.onclick = function() { switchOp(idx); };
+      bar.appendChild(tab);
+    });
+  }
+
+  function switchOp(idx) {
+    activeOp = idx;
+    var tabs = $('tab-bar').children;
+    for (var i=0;i<tabs.length;i++) tabs[i].classList.toggle('active', i === idx);
+    hideReveal();
+    closePanel();
+    updateHeader();
+    renderGunkHand();
     renderHistory();
+    $('gunk-hand-title').textContent = opponents[idx].name + ' — Gunk in Hand';
   }
 
   // ---------- Rendering ----------
+  function op() { return opponents[activeOp]; }
+
   function updateHeader() {
-    $('s-lib').textContent = game.library.length;
-    $('s-gunk-lib').textContent = countGunk(game.library);
-    $('s-gunk-hand').textContent = game.handGunk;
-    $('s-gunk-gy').textContent = game.graveyardGunk;
+    var o = op();
+    $('s-lib').textContent = o.library.length;
+    $('s-gunk-lib').textContent = countGunk(o.library);
+    $('s-gunk-hand').textContent = o.handGunk;
+    $('s-gunk-gy').textContent = o.graveyardGunk;
   }
 
   function renderHistory() {
     var el = $('history');
     el.innerHTML = '';
-    game.history.forEach(function(entry){
+    op().history.forEach(function(entry){
       var d = document.createElement('div');
       d.className = 'history-entry';
-      d.innerHTML = '<span class="time">' + entry.time + '</span>' + escapeHtml(entry.text);
+      d.innerHTML = '<span class="time">' + entry.time + '</span><span class="op-tag" style="color:' + op().color + '">' + escapeHtml(op().name) + '</span>' + escapeHtml(entry.text);
       el.appendChild(d);
     });
+  }
+
+  function globalHistory(msg) {
+    opponents.forEach(function(o) {
+      o.history.unshift({ time: formatTime(), text: msg });
+    });
+    renderHistory();
   }
 
   function escapeHtml(t) {
     return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  function formatTime() {
+    var d = new Date();
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0');
+  }
+
   function renderGunkHand() {
     var box = $('gunk-chips');
     box.innerHTML = '';
-    for (var i=0;i<game.handGunk;i++) {
+    var o = op();
+    for (var i=0;i<o.handGunk;i++) {
       var s = document.createElement('span');
       s.className = 'gunk-chip'; s.textContent = 'G';
       box.appendChild(s);
     }
-    if (game.handGunk === 0) {
+    if (o.handGunk === 0) {
       var e = document.createElement('span');
       e.className = 'text-dim'; e.textContent = 'No Gunk in hand';
       box.appendChild(e);
@@ -399,67 +534,43 @@
     $('reveal-box').classList.remove('active');
   }
 
-  // ---------- Setup ----------
-  $('btn-setup').addEventListener('click', function() {
-    var libSize = parseInt($('lib-size').value, 10) || 0;
-    var gunkCount = parseInt($('gunk-count').value, 10) || 0;
-    var custom = $('custom-seed').value.trim();
-    var seedNum;
-    if (custom) { seedNum = seedFromString(custom); }
-    else { seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0); }
-    var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
-    game.seed = seedHex;
-    game.rng = mulberry32(seedNum);
-    game.library = buildLibrary(libSize, gunkCount, game.rng);
-    game.handGunk = 0;
-    game.graveyardGunk = 0;
-    game.graveyardClean = 0;
-    game.exiled = [];
-    game.drawCount = 0;
-    game.history = [];
-    game.totalGunkShuffled = gunkCount;
-    game.gunkDrawnTotal = 0;
-    game.gunkCycledTotal = 0;
-    game.cardsRemovedTotal = 0;
-
-    $('setup-seed').textContent = 'Seed: ' + seedHex;
-    updateHeader();
-    renderGunkHand();
-    log('Shuffled ' + gunkCount + ' Gunk into library of ' + libSize + ' (Seed: ' + seedHex + ')');
-    showScreen('main');
-  });
+  function logOp(msg) {
+    var o = op();
+    o.history.unshift({ time: formatTime(), text: msg });
+    renderHistory();
+  }
 
   // ---------- Draw ----------
   $('btn-draw').addEventListener('click', function() {
     hideReveal();
-    if (game.library.length === 0) {
+    var o = op();
+    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.library.length === 0) {
       showReveal('Draw', '<div class="reveal-empty">Library empty!</div>', '');
-      log('Draw: Library empty');
+      logOp('Draw: Library empty');
       return;
     }
-    game.drawCount++;
-    var card = game.library.shift();
+    o.drawCount++;
+    var card = o.library.shift();
     var isGunk = card.type === 'gunk';
     var html = '<div class="reveal-card ' + (isGunk?'gunk':'clean') + '">' + (isGunk?'GUNK':'Clean') + '</div>';
     var actions = '';
     if (isGunk) {
       actions = '<button id="add-hand" class="btn btn-primary">Add to Hand</button>';
     }
-    showReveal('Draw #' + game.drawCount, html, actions);
-    log('Draw #' + game.drawCount + ': ' + (isGunk?'GUNK':'Clean'));
+    showReveal('Draw #' + o.drawCount, html, actions);
+    logOp('Draw #' + o.drawCount + ': ' + (isGunk?'GUNK':'Clean'));
     updateHeader();
 
     if (isGunk) {
       $('add-hand').addEventListener('click', function() {
-        game.handGunk++;
-        game.gunkDrawnTotal++;
+        o.handGunk++;
+        o.gunkDrawnTotal++;
         hideReveal();
         renderGunkHand();
         updateHeader();
-        log('Gunk added to hand');
+        logOp('Gunk added to hand');
       });
-    } else {
-      // Clean card drawn — stays in real hand, not tracked further
     }
   });
 
@@ -529,8 +640,10 @@
   $('btn-surveil').addEventListener('click', function() { openPanel('Surveil', 'surveil'); });
 
   function doSurveilLook() {
-    var n = Math.min(parseInt($('panel-input').value,10)||0, game.library.length);
-    panelCards = game.library.slice(0, n);
+    var o = op();
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
+    panelCards = o.library.slice(0, n);
     panelResult = panelCards.map(function(c,i){ return { card: c, toGraveyard: false, index: i }; });
     renderSurveil();
   }
@@ -575,19 +688,17 @@
   }
 
   function applySurveil() {
+    var o = op();
     var gy = [];
     var kept = [];
     panelResult.forEach(function(item){ if(item.toGraveyard) gy.push(item.card); else kept.push(item.card); });
-    // Remove top N from library
-    game.library.splice(0, panelCards.length);
-    // Add kept back to top in order
-    game.library = kept.concat(game.library);
-    // Send gy to graveyard
-    gy.forEach(function(c){ if(c.type==='gunk') game.graveyardGunk++; else game.graveyardClean++; });
-    var parts = panelResult.map(function(item, i){
+    o.library.splice(0, panelCards.length);
+    o.library = kept.concat(o.library);
+    gy.forEach(function(c){ if(c.type==='gunk') o.graveyardGunk++; else o.graveyardClean++; });
+    var parts = panelResult.map(function(item){
       return (item.card.type==='gunk'?'Gunk':'Clean') + ' → ' + (item.toGraveyard?'GY':'Lib');
     });
-    log('Surveil ' + panelCards.length + ': ' + parts.join(', '));
+    logOp('Surveil ' + panelCards.length + ': ' + parts.join(', '));
     updateHeader();
     closePanel();
   }
@@ -596,8 +707,10 @@
   $('btn-scry').addEventListener('click', function() { openPanel('Scry', 'scry'); });
 
   function doScryLook() {
-    var n = Math.min(parseInt($('panel-input').value,10)||0, game.library.length);
-    panelResult = game.library.slice(0, n);
+    var o = op();
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
+    panelResult = o.library.slice(0, n);
     renderScry();
   }
 
@@ -623,10 +736,11 @@
   }
 
   function applyScry() {
+    var o = op();
     var n = panelResult.length;
-    game.library.splice(0, n);
-    game.library = panelResult.concat(game.library);
-    log('Scry ' + n + ': reordered top ' + n);
+    o.library.splice(0, n);
+    o.library = panelResult.concat(o.library);
+    logOp('Scry ' + n + ': reordered top ' + n);
     closePanel();
   }
 
@@ -634,8 +748,10 @@
   $('btn-mill').addEventListener('click', function() { openPanel('Mill', 'mill'); });
 
   function doMillLook() {
-    var n = Math.min(parseInt($('panel-input').value,10)||0, game.library.length);
-    panelResult = game.library.slice(0, n);
+    var o = op();
+    if (o.eliminated) { closePanel(); showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    var n = Math.min(parseInt($('panel-input').value,10)||0, o.library.length);
+    panelResult = o.library.slice(0, n);
     renderMill();
   }
 
@@ -657,30 +773,33 @@
   }
 
   function applyMill() {
+    var o = op();
     var n = panelResult.length;
-    var removed = game.library.splice(0, n);
+    var removed = o.library.splice(0, n);
     var gunkMilled = 0;
-    removed.forEach(function(c){ if(c.type==='gunk'){ game.graveyardGunk++; gunkMilled++; } else game.graveyardClean++; });
-    game.cardsRemovedTotal += removed.length;
-    log('Mill ' + n + ': ' + gunkMilled + ' Gunk, ' + (n-gunkMilled) + ' Clean to GY');
+    removed.forEach(function(c){ if(c.type==='gunk'){ o.graveyardGunk++; gunkMilled++; } else o.graveyardClean++; });
+    o.cardsRemovedTotal += removed.length;
+    logOp('Mill ' + n + ': ' + gunkMilled + ' Gunk, ' + (n-gunkMilled) + ' Clean to GY');
     updateHeader();
     closePanel();
   }
 
   // ---------- Tutor ----------
   $('btn-tutor').addEventListener('click', function() {
+    var o = op();
+    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
     openPanel('Tutor — Choose a card to fetch', 'tutor');
     $('panel-body').innerHTML = '';
-    if (game.library.length === 0) { $('panel-body').textContent = 'Library is empty.'; return; }
+    if (o.library.length === 0) { $('panel-body').textContent = 'Library is empty.'; return; }
     var list = document.createElement('div'); list.className = 'tutor-list';
-    game.library.forEach(function(card, idx){
+    o.library.forEach(function(card, idx){
       var item = document.createElement('div');
       item.className = 'tutor-item ' + (card.type==='gunk'?'gunk-text':'clean-text');
       item.textContent = (card.type==='gunk'?'GUNK':'Clean') + ' #' + card.id;
       item.addEventListener('click', function(){
-        var fetched = game.library.splice(idx, 1)[0];
-        game.cardsRemovedTotal++;
-        log('Tutored: ' + (fetched.type==='gunk'?'GUNK':'Clean') + ' #' + fetched.id);
+        var fetched = o.library.splice(idx, 1)[0];
+        o.cardsRemovedTotal++;
+        logOp('Tutored: ' + (fetched.type==='gunk'?'GUNK':'Clean') + ' #' + fetched.id);
         updateHeader();
         closePanel();
       });
@@ -691,13 +810,15 @@
 
   // ---------- Shuffle Library ----------
   $('btn-shuffle').addEventListener('click', function() {
-    if (game.library.length === 0) { log('Shuffle: Library empty'); return; }
+    var o = op();
+    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.library.length === 0) { logOp('Shuffle: Library empty'); return; }
     var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
     var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
-    game.seed = seedHex;
-    game.rng = mulberry32(seedNum);
-    shuffleInPlace(game.library, game.rng);
-    log('Shuffled library (Seed: ' + seedHex + ')');
+    o.seed = seedHex;
+    var rng = mulberry32(seedNum);
+    shuffleInPlace(o.library, rng);
+    logOp('Shuffled library (Seed: ' + seedHex + ')');
     showReveal('Shuffled', '<div class="reveal-card clean">Library Shuffled</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
     setTimeout(hideReveal, 2000);
     updateHeader();
@@ -705,61 +826,89 @@
 
   // ---------- Cycle Gunk ----------
   $('btn-cycle').addEventListener('click', function() {
-    if (game.handGunk <= 0) return;
-    game.handGunk--;
-    game.gunkCycledTotal++;
+    var o = op();
+    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    if (o.handGunk <= 0) return;
+    o.handGunk--;
+    o.gunkCycledTotal++;
     renderGunkHand();
     updateHeader();
-    log('Cycled Gunk for {4}');
+    logOp('Cycled Gunk for {4}');
 
-    if (game.library.length === 0) {
-      log('Cycle: Library empty, no replacement');
+    if (o.library.length === 0) {
+      logOp('Cycle: Library empty, no replacement');
       showReveal('Cycle', '<div class="reveal-empty">Library empty — no replacement draw</div>', '');
       return;
     }
-    var card = game.library.shift();
+    var card = o.library.shift();
     if (card.type === 'gunk') {
-      game.handGunk++;
-      game.gunkDrawnTotal++;
+      o.handGunk++;
+      o.gunkDrawnTotal++;
       renderGunkHand();
       updateHeader();
       showReveal('Cycle Replacement', '<div class="reveal-card gunk">GUNK!</div><div style="color:var(--gunk); font-weight:700;">Cycled into another GUNK!</div>', '');
-      log('Cycle replacement: GUNK');
+      logOp('Cycle replacement: GUNK');
     } else {
       showReveal('Cycle Replacement', '<div class="reveal-card clean">Clean</div>', '');
-      log('Cycle replacement: Clean');
+      logOp('Cycle replacement: Clean');
+    }
+  });
+
+  // ---------- Opponent Eliminated ----------
+  $('btn-op-end').addEventListener('click', function() {
+    var o = op();
+    if (confirm('Eliminate ' + o.name + '?')) {
+      o.eliminated = true;
+      buildTabs();
+      showReveal('Eliminated', '<div class="reveal-card clean">' + o.name + ' eliminated</div>', '');
+      globalHistory(o.name + ' eliminated');
+      setTimeout(hideReveal, 1500);
     }
   });
 
   // ---------- End Game ----------
-  $('btn-end').addEventListener('click', function() {
-    $('e-drawn').textContent = game.gunkDrawnTotal;
-    $('e-cycled').textContent = game.gunkCycledTotal;
-    $('e-stuck').textContent = game.handGunk;
-    $('e-removed').textContent = game.cardsRemovedTotal;
-    $('end-seed').textContent = 'Final Seed: ' + game.seed;
+  $('btn-global-end').addEventListener('click', function() {
+    var list = $('end-op-list');
+    list.innerHTML = '';
+    opponents.forEach(function(o){
+      var card = document.createElement('div');
+      card.className = 'op-end-card';
+      card.innerHTML =
+        '<div class="op-name"><span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:' + o.color + ';"></span>' + escapeHtml(o.name) + (o.eliminated ? ' <span style="color:var(--danger);font-size:12px;">(OUT)</span>' : '') + '</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-card"><div class="num">' + o.gunkDrawnTotal + '</div><div class="desc">Gunk Drawn</div></div>' +
+          '<div class="stat-card"><div class="num">' + o.gunkCycledTotal + '</div><div class="desc">Gunk Cycled</div></div>' +
+          '<div class="stat-card"><div class="num">' + o.handGunk + '</div><div class="desc">Gunk Stuck</div></div>' +
+          '<div class="stat-card"><div class="num">' + o.cardsRemovedTotal + '</div><div class="desc">Cards Removed</div></div>' +
+        '</div>' +
+        '<div class="seed-display" style="margin-top:8px;">Seed: ' + o.seed + '</div>';
+      list.appendChild(card);
+    });
+    $('end-seed').textContent = 'Final Seeds shown above';
     showScreen('end');
   });
 
   $('btn-new').addEventListener('click', function() {
     hideReveal();
     $('setup-seed').textContent = '';
+    opponents = [];
     showScreen('setup');
   });
 
-  // ---------- Add Gunk (multiple Fludge triggers) ----------
+  // ---------- Add Gunk ----------
   $('btn-add-gunk').addEventListener('click', function() {
     hideReveal();
-    var count = parseInt(prompt('How many Gunk cards to add?', '3'), 10) || 0;
+    var o = op();
+    if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
+    var count = parseInt(prompt('How many Gunk cards to add to ' + o.name + '?', '3'), 10) || 0;
     if (count <= 0) return;
-    for (var i=0;i<count;i++) game.library.push({ id: nextId(), type: 'gunk' });
+    for (var i=0;i<count;i++) o.library.push({ id: Date.now()+i, type: 'gunk' });
     var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
     var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
-    game.seed = seedHex;
-    game.rng = mulberry32(seedNum);
-    shuffleInPlace(game.library, game.rng);
-    game.totalGunkShuffled += count;
-    log('Added ' + count + ' Gunk and reshuffled (Seed: ' + seedHex + ')');
+    o.seed = seedHex;
+    var rng = mulberry32(seedNum);
+    shuffleInPlace(o.library, rng);
+    logOp('Added ' + count + ' Gunk and reshuffled (Seed: ' + seedHex + ')');
     showReveal('Gunk Added', '<div class="reveal-card gunk">+' + count + ' GUNK</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
     setTimeout(hideReveal, 2000);
     updateHeader();
@@ -772,12 +921,10 @@
     else if (panelMode === 'mill') doMillLook();
   });
 
-  // Keyboard support for panel input
   $('panel-input').addEventListener('keydown', function(e){
     if (e.key === 'Enter') $('panel-look').click();
   });
 
-  // Prevent zoom on inputs for iOS
   document.addEventListener('focusin', function(e){ if(e.target.tagName==='INPUT') e.target.style.fontSize='16px'; });
 
 })();
