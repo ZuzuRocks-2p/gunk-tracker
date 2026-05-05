@@ -314,6 +314,25 @@
       <div id="panel-body" class="panel-body"></div>
       <div id="panel-footer" class="panel-footer"></div>
     </div>
+  
+  <!-- CUSTOM PROMPT MODAL -->
+  <div id="prompt-overlay" class="panel-overlay">
+    <div class="panel" style="max-height:40vh; border-top-color:var(--gunk);">
+      <div class="panel-header">
+        <div id="prompt-title" class="panel-title" style="color:var(--gunk);">Add Gunk</div>
+        <button id="prompt-close" class="btn btn-secondary" style="padding:8px 12px; min-height:40px; font-size:14px;">Cancel</button>
+      </div>
+      <div class="panel-body" style="justify-content:center;">
+        <div class="field" style="max-width:none;">
+          <label id="prompt-label">How many Gunk cards?</label>
+          <input id="prompt-input" type="number" inputmode="numeric" value="3" min="1" max="999" style="font-size:20px; padding:16px;">
+        </div>
+      </div>
+      <div class="panel-footer">
+        <button id="prompt-cancel" class="btn btn-secondary" style="flex:1;">Cancel</button>
+        <button id="prompt-confirm" class="btn btn-primary" style="flex:2;">Add Gunk</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -896,22 +915,39 @@
   });
 
   // ---------- Add Gunk ----------
+  function openPrompt(title, label, defaultVal, onConfirm) {
+    $('prompt-title').textContent = title;
+    $('prompt-label').textContent = label;
+    $('prompt-input').value = defaultVal;
+    $('prompt-overlay').classList.add('active');
+    $('prompt-input').focus();
+    var handler = function() {
+      var val = parseInt($('prompt-input').value, 10) || 0;
+      $('prompt-overlay').classList.remove('active');
+      if (val > 0) onConfirm(val);
+    };
+    $('prompt-confirm').onclick = handler;
+    $('prompt-input').onkeydown = function(e) { if (e.key === 'Enter') handler(); };
+  }
+  $('prompt-close').addEventListener('click', function() { $('prompt-overlay').classList.remove('active'); });
+  $('prompt-cancel').addEventListener('click', function() { $('prompt-overlay').classList.remove('active'); });
+
   $('btn-add-gunk').addEventListener('click', function() {
     hideReveal();
     var o = op();
     if (o.eliminated) { showReveal('Eliminated', '<div class="reveal-empty">' + o.name + ' is out</div>', ''); return; }
-    var count = parseInt(prompt('How many Gunk cards to add to ' + o.name + '?', '3'), 10) || 0;
-    if (count <= 0) return;
-    for (var i=0;i<count;i++) o.library.push({ id: Date.now()+i, type: 'gunk' });
-    var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
-    var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
-    o.seed = seedHex;
-    var rng = mulberry32(seedNum);
-    shuffleInPlace(o.library, rng);
-    logOp('Added ' + count + ' Gunk and reshuffled (Seed: ' + seedHex + ')');
-    showReveal('Gunk Added', '<div class="reveal-card gunk">+' + count + ' GUNK</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
-    setTimeout(hideReveal, 2000);
-    updateHeader();
+    openPrompt('Add Gunk', 'How many Gunk cards to add to ' + o.name + '?', '3', function(count) {
+      for (var i=0;i<count;i++) o.library.push({ id: Date.now()+i, type: 'gunk' });
+      var seedNum = (Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
+      var seedHex = seedNum.toString(16).toUpperCase().padStart(8,'0');
+      o.seed = seedHex;
+      var rng = mulberry32(seedNum);
+      shuffleInPlace(o.library, rng);
+      logOp('Added ' + count + ' Gunk and reshuffled (Seed: ' + seedHex + ')');
+      showReveal('Gunk Added', '<div class="reveal-card gunk">+' + count + ' GUNK</div><div class="seed-display" style="margin-top:6px;">Seed: ' + seedHex + '</div>', '');
+      setTimeout(hideReveal, 2000);
+      updateHeader();
+    });
   });
 
   // ---------- Panel look button ----------
